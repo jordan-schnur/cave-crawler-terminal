@@ -1,4 +1,4 @@
-use crate::drawable::Drawable;
+use crate::drawable::{BoundingBox, Drawable};
 use crate::frame::Frame;
 
 pub struct Fps {
@@ -25,5 +25,14 @@ impl Drawable for Fps {
     fn draw(&self, frame: &mut Frame) {
         // Draw the FPS counter at (x, y).
         frame.draw_text(frame.width - 10, 0, &format!("FPS: {}", self.fps), None, None);
+    }
+
+    fn bound_box(&self) -> BoundingBox {
+        BoundingBox {
+            left: 0,
+            right: 0,
+            top: 0,
+            bottom: 0,
+        }
     }
 }

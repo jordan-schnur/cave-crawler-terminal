@@ -1,15 +1,28 @@
 use crossterm::style::Color;
-use crate::drawable::Drawable;
-use crate::frame::Frame;
+use crate::drawable::{BoundingBox, Drawable};
+use crate::frame::{Cell, Frame};
 
 pub struct Tree {
-    pub x: u16,
-    pub y: u16,
+    pub x: i32,
+    pub y: i32,
 }
 
 impl Drawable for Tree {
     fn draw(&self, frame: &mut Frame) {
         // A single 'T' at (x, y).
-        frame.set(self.x, self.y, 'T', Some(Color::Green), None);
+        frame.set_world_cell(self.x, self.y, Cell {
+            ch: 'T',
+            fg: Some(Color::Green),
+            bg: None,
+        });
+    }
+
+    fn bound_box(&self) -> BoundingBox {
+        BoundingBox {
+            left: self.x as i32,
+            right: self.x as i32,
+            top: self.y as i32,
+            bottom: self.y as i32,
+        }
     }
 }

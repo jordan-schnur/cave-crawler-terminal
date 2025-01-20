@@ -1,6 +1,8 @@
 mod frame;
 mod drawable;
 mod game;
+mod camera;
+mod bounding_box;
 
 use crossterm::{
     cursor::MoveTo,
@@ -26,7 +28,9 @@ fn main() -> Result<()> {
     enable_raw_mode()?;
     execute!(stdout, EnterAlternateScreen, Hide, Clear(ClearType::Purge))?;
 
-    let mut game = Game::new();
+    let (width, height) = size()?;
+
+    let mut game = Game::new(width, height);
 
     loop {
         // execute!(stdout, Clear(ClearType::Purge))?;
@@ -39,17 +43,13 @@ fn main() -> Result<()> {
                     }
                     KeyCode::Left => {
                         // Move player left, if possible
-                        if game.player_x > 0 {
-                            game.player_x -= 1;
-                        }
+                        game.player_x -= 1;
                     }
                     KeyCode::Right => {
                         game.player_x += 1;
                     }
                     KeyCode::Up => {
-                        if game.player_y > 0 {
-                            game.player_y -= 1;
-                        }
+                        game.player_y -= 1;
                     }
                     KeyCode::Down => {
                         game.player_y += 1;
@@ -60,21 +60,14 @@ fn main() -> Result<()> {
         }
 
         let (width, height) = size()?;
-        let mut frame = Frame::new(width, height);
-
-
-        // Manually overwrite every cell with a space
-        // for row in 0..height {
-        //     for col in 0..width {
-        //         execute!(stdout, MoveTo(col, row), Print(" "))?;
-        //     }
-        // }
-
-        // game.handle_input().expect("TODO: panic message");
 
         game.update();
+        game.update_camera(width, height);
+
+        let mut frame = Frame::new(game.camera.x, game.camera.y, width, height);
 
         game.draw(&mut frame);
+        game.draw_ui(&mut frame);
 
         render_frame(&mut stdout, &frame)?;
 

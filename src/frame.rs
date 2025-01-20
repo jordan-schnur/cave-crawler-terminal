@@ -1,15 +1,18 @@
 use std::cmp;
 use crossterm::style::Color;
+use crate::camera::Camera;
 
 pub struct Frame {
     pub width: u16,
     pub height: u16,
 
     pub buffer: Vec<Cell>,
+    cam_x: i32,
+    cam_y: i32,
 }
 
 impl Frame {
-    pub fn new(width: u16, height: u16) -> Self {
+    pub fn new(cam_x: i32, cam_y: i32, width: u16, height: u16) -> Self {
         Frame {
             width,
             height,
@@ -18,7 +21,36 @@ impl Frame {
                 fg: None,
                 bg: None,
             }; (width * height) as usize],
+            cam_x,
+            cam_y
         }
+    }
+
+    pub fn set_world_char(&mut self, world_x: i32, world_y: i32, ch: char) {
+        self.set_world_cell(world_x, world_y, Cell {
+            ch,
+            fg: None,
+            bg: None,
+        })
+    }
+
+    pub fn set_world_cell(&mut self, world_x: i32, world_y: i32, cell: Cell) {
+        let screen_x = world_x - self.cam_x;
+        let screen_y = world_y - self.cam_y;
+
+        // Figure out how tall the game region is
+        let game_height = self.height - (self.height / 3);
+
+        // Now, ensure we only draw if it's within the top game region
+        if screen_x < 0 || screen_x as u16 >= self.width {
+            return;
+        }
+        if screen_y < 0 || screen_y as u16 >= game_height {
+            return;
+        }
+
+        let idx = (screen_y as u16 * self.width + screen_x as u16) as usize;
+        self.buffer[idx] = cell;
     }
 
     pub fn set(&mut self, x: u16, y: u16, ch: char, fg: Option<Color>, bg: Option<Color>) {

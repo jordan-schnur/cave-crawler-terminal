@@ -1,6 +1,7 @@
-use crate::drawable::{BoundingBox, Drawable};
+use crate::drawable::{Drawable};
 use crate::frame::{Cell, Frame};
 use crossterm::style::Color;
+use crate::bounding_box::BoundingBox;
 
 pub struct Tree {
     pub x: i32,

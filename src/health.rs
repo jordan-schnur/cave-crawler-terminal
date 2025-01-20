@@ -1,7 +1,7 @@
 #[derive(Clone, Copy, Debug)]
 pub struct Health {
-    pub current: i32,
-    pub max: i32,
+    current: i32,
+    max: i32,
 }
 
 impl Health {
@@ -26,7 +26,21 @@ impl Health {
         }
     }
 
+    pub fn get_current(&self) -> i32 {
+        self.current
+    }
+
+    pub fn get_max(&self) -> i32 {
+        self.max
+    }
+
     pub fn is_alive(&self) -> bool {
         self.current > 0
+    }
+}
+
+impl std::fmt::Display for Health {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        write!(f, "{}/{}", self.current, self.max)
     }
 }

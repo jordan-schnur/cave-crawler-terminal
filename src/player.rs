@@ -2,15 +2,15 @@ use crate::camera::Camera;
 use crate::frame::Frame;
 use crate::health::Health;
 
-pub struct player {
+pub struct Player {
     pub x: i32,
     pub y: i32,
     pub health: Health
 }
 
-impl player {
+impl Player {
     pub fn new(x: i32, y: i32) -> Self {
-        player {
+        Player {
             x,
             y,
             health: Health::new(100),

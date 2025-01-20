@@ -5,6 +5,9 @@ mod frame;
 mod game;
 mod player;
 mod health;
+mod moveable;
+mod enemy;
+mod pathfinding;
 
 use crate::frame::Frame;
 use crate::game::Game;

@@ -21,11 +21,21 @@ impl Frame {
                     ch: ' ',
                     fg: None,
                     bg: None,
+                    is_walkable: true,
                 };
                 (width * height) as usize
             ],
             cam_x,
             cam_y,
+        }
+    }
+
+    pub fn is_walkable(&self, x: u16, y: u16) -> bool {
+        if x < self.width && y < self.height {
+            let index = (y * self.width + x) as usize;
+            self.buffer[index].is_walkable
+        } else {
+            false
         }
     }
 
@@ -37,6 +47,7 @@ impl Frame {
                 ch,
                 fg: None,
                 bg: None,
+                is_walkable: true,
             },
         )
     }
@@ -63,7 +74,7 @@ impl Frame {
     pub fn set(&mut self, x: u16, y: u16, ch: char, fg: Option<Color>, bg: Option<Color>) {
         if x < self.width && y < self.height {
             let index = (y * self.width + x) as usize;
-            self.buffer[index] = Cell { ch, fg, bg };
+            self.buffer[index] = Cell { ch, fg, bg, is_walkable: true };
         }
     }
 
@@ -105,4 +116,5 @@ pub struct Cell {
     pub ch: char,
     pub fg: Option<Color>,
     pub bg: Option<Color>,
+    pub is_walkable: bool,
 }

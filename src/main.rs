@@ -3,12 +3,14 @@ mod camera;
 mod drawable;
 mod frame;
 mod game;
+mod player;
+mod health;
 
 use crate::frame::Frame;
 use crate::game::Game;
 use crossterm::cursor::{Hide, Show};
 use crossterm::style::{ResetColor, SetBackgroundColor, SetForegroundColor};
-use crossterm::terminal::{Clear, ClearType};
+use crossterm::terminal::{BeginSynchronizedUpdate, Clear, ClearType, EndSynchronizedUpdate, SetTitle};
 use crossterm::{
     cursor::MoveTo,
     event::{poll, read, Event, KeyCode},
@@ -26,43 +28,17 @@ fn main() -> Result<()> {
 
     // Enable raw mode and switch to the alternate screen
     enable_raw_mode()?;
-    execute!(stdout, EnterAlternateScreen, Hide, Clear(ClearType::Purge))?;
+    execute!(stdout, EnterAlternateScreen, Hide, Clear(ClearType::Purge), SetTitle("Cave Diver Terminal"))?;
 
     let (width, height) = size()?;
 
     let mut game = Game::new(width, height);
 
     loop {
-        // execute!(stdout, Clear(ClearType::Purge))?;
-
-        if poll(Duration::from_millis(8))? {
-            if let Event::Key(key_event) = read()? {
-                match key_event.code {
-                    KeyCode::Esc => {
-                        game.request_exit = true;
-                    }
-                    KeyCode::Left => {
-                        // Move player left, if possible
-                        game.player_x -= 1;
-                    }
-                    KeyCode::Right => {
-                        game.player_x += 1;
-                    }
-                    KeyCode::Up => {
-                        game.player_y -= 1;
-                    }
-                    KeyCode::Down => {
-                        game.player_y += 1;
-                    }
-                    _ => {}
-                }
-            }
-        }
-
+        execute!(&mut stdout, BeginSynchronizedUpdate)?;
         let (width, height) = size()?;
 
-        game.update();
-        game.update_camera(width, height);
+        game.update(width, height);
 
         let mut frame = Frame::new(game.camera.x, game.camera.y, width, height);
 
@@ -72,6 +48,8 @@ fn main() -> Result<()> {
         render_frame(&mut stdout, &frame)?;
 
         stdout.flush()?;
+
+        execute!(&mut stdout, EndSynchronizedUpdate)?;
 
         if game.request_exit {
             break;

@@ -17,6 +17,7 @@ impl Drawable for Tree {
                 ch: 'T',
                 fg: Some(Color::Green),
                 bg: None,
+                is_walkable: false,
             },
         );
     }

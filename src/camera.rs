@@ -28,7 +28,11 @@ impl Camera {
         let screen_x = world_x - self.x;
         let screen_y = world_y - self.y;
 
-        if screen_x >= 0 && screen_x < self.width as i32 && screen_y >= 0 && screen_y < self.height as i32 {
+        if screen_x >= 0
+            && screen_x < self.width as i32
+            && screen_y >= 0
+            && screen_y < self.height as i32
+        {
             Some((screen_x as u16, screen_y as u16))
         } else {
             None
@@ -40,7 +44,10 @@ impl Camera {
         let right = self.x + self.width as i32;
         let bottom = self.y + self.height as i32;
 
-        !(world_x + width as i32 <= self.x || world_x >= right || world_y + height as i32 <= self.y || world_y >= bottom)
+        !(world_x + width as i32 <= self.x
+            || world_x >= right
+            || world_y + height as i32 <= self.y
+            || world_y >= bottom)
     }
 
     pub fn update_bbox(&mut self) {

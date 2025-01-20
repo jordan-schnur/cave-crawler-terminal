@@ -1,9 +1,14 @@
-mod frame;
-mod drawable;
-mod game;
-mod camera;
 mod bounding_box;
+mod camera;
+mod drawable;
+mod frame;
+mod game;
 
+use crate::frame::Frame;
+use crate::game::Game;
+use crossterm::cursor::{Hide, Show};
+use crossterm::style::{ResetColor, SetBackgroundColor, SetForegroundColor};
+use crossterm::terminal::{Clear, ClearType};
 use crossterm::{
     cursor::MoveTo,
     event::{poll, read, Event, KeyCode},
@@ -13,13 +18,8 @@ use crossterm::{
         disable_raw_mode, enable_raw_mode, size, EnterAlternateScreen, LeaveAlternateScreen,
     },
 };
-use std::io::{stdout, Write, Result};
+use std::io::{stdout, Result, Write};
 use std::time::Duration;
-use crossterm::cursor::{Hide, Show};
-use crossterm::style::{ResetColor, SetBackgroundColor, SetForegroundColor};
-use crossterm::terminal::{Clear, ClearType};
-use crate::frame::Frame;
-use crate::game::Game;
 
 fn main() -> Result<()> {
     let mut stdout = stdout();

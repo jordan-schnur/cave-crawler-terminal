@@ -1,12 +1,12 @@
-use std::time::Duration;
-use crossterm::event::{poll, read, Event, KeyCode};
 use crate::camera::Camera;
 use crate::drawable::Drawable;
 use crate::frame::Frame;
+use crossterm::event::{poll, read, Event, KeyCode};
+use std::time::Duration;
 
+use crate::drawable::fps::Fps;
 use crate::drawable::room::Room;
 use crate::drawable::tree::Tree;
-use crate::drawable::fps::Fps;
 
 pub struct Game {
     drawables: Vec<Box<dyn Drawable>>,
@@ -46,7 +46,7 @@ impl Game {
             player_y: 10,
             request_exit: false,
             fps,
-            camera
+            camera,
         }
     }
 
@@ -56,7 +56,6 @@ impl Game {
 
         self.camera.width = camera_width;
         self.camera.height = game_height;
-
 
         let half_w = camera_width as i32 / 2;
         let half_h = game_height as i32 / 2;
@@ -84,9 +83,7 @@ impl Game {
         }
     }
 
-    pub fn update(&mut self) {
-
-    }
+    pub fn update(&mut self) {}
 
     pub fn draw_ui(&self, frame: &mut Frame) {
         // Where the "UI" starts.
@@ -101,21 +98,15 @@ impl Game {
 
         // Example: Write some text in the panel
         frame.draw_text(
-            2, // x
+            2,            // x
             ui_start + 1, // y
             "Action Log: Nothing yet...",
             None,
-            None
+            None,
         );
 
         // If you want to display an equipped weapon, do:
-        frame.draw_text(
-            25,
-            ui_start + 3,
-            "Weapon: Rusty Sword",
-            None,
-            None
-        );
+        frame.draw_text(25, ui_start + 3, "Weapon: Rusty Sword", None, None);
 
         // Or show the FPS you’re already tracking:
         frame.draw_text(
@@ -123,7 +114,7 @@ impl Game {
             ui_start + 1,
             &format!("FPS: {}", self.fps.fps),
             None,
-            None
+            None,
         );
     }
 }

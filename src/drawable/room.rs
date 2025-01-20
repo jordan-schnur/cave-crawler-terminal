@@ -1,4 +1,3 @@
-
 use crate::drawable::{BoundingBox, Drawable};
 use crate::frame::Frame;
 

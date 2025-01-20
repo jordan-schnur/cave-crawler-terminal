@@ -1,6 +1,6 @@
-use std::cmp;
-use crossterm::style::Color;
 use crate::camera::Camera;
+use crossterm::style::Color;
+use std::cmp;
 
 pub struct Frame {
     pub width: u16,
@@ -16,22 +16,29 @@ impl Frame {
         Frame {
             width,
             height,
-            buffer: vec![Cell {
-                ch: ' ',
-                fg: None,
-                bg: None,
-            }; (width * height) as usize],
+            buffer: vec![
+                Cell {
+                    ch: ' ',
+                    fg: None,
+                    bg: None,
+                };
+                (width * height) as usize
+            ],
             cam_x,
-            cam_y
+            cam_y,
         }
     }
 
     pub fn set_world_char(&mut self, world_x: i32, world_y: i32, ch: char) {
-        self.set_world_cell(world_x, world_y, Cell {
-            ch,
-            fg: None,
-            bg: None,
-        })
+        self.set_world_cell(
+            world_x,
+            world_y,
+            Cell {
+                ch,
+                fg: None,
+                bg: None,
+            },
+        )
     }
 
     pub fn set_world_cell(&mut self, world_x: i32, world_y: i32, cell: Cell) {

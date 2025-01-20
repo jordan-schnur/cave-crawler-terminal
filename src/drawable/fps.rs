@@ -24,7 +24,13 @@ impl Fps {
 impl Drawable for Fps {
     fn draw(&self, frame: &mut Frame) {
         // Draw the FPS counter at (x, y).
-        frame.draw_text(frame.width - 10, 0, &format!("FPS: {}", self.fps), None, None);
+        frame.draw_text(
+            frame.width - 10,
+            0,
+            &format!("FPS: {}", self.fps),
+            None,
+            None,
+        );
     }
 
     fn bound_box(&self) -> BoundingBox {

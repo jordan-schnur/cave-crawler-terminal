@@ -56,10 +56,8 @@ impl Frame {
         let screen_x = world_x - self.cam_x;
         let screen_y = world_y - self.cam_y;
 
-        // Figure out how tall the game region is
         let game_height = self.height - (self.height / 3);
 
-        // Now, ensure we only draw if it's within the top game region
         if screen_x < 0 || screen_x as u16 >= self.width {
             return;
         }
@@ -74,7 +72,12 @@ impl Frame {
     pub fn set(&mut self, x: u16, y: u16, ch: char, fg: Option<Color>, bg: Option<Color>) {
         if x < self.width && y < self.height {
             let index = (y * self.width + x) as usize;
-            self.buffer[index] = Cell { ch, fg, bg, is_walkable: true };
+            self.buffer[index] = Cell {
+                ch,
+                fg,
+                bg,
+                is_walkable: true,
+            };
         }
     }
 

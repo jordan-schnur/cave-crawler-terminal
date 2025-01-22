@@ -1,11 +1,13 @@
-use crossterm::style::Color;
 use crate::bounding_box::BoundingBox;
 use crate::camera::Camera;
-use crate::drawable::{Drawable};
+use crate::drawable::Drawable;
 use crate::frame::Frame;
 use crate::health::Health;
-use crate::pathfinding::{find_path, Point};
+use crate::pathfinding::{bounding_box_for_path, find_path, Point};
 use crate::player::Player;
+use crate::tile::{Coord, Tile};
+use crossterm::style::Color;
+use std::collections::HashMap;
 
 pub struct Goblin {
     pub x: i32,
@@ -32,7 +34,7 @@ impl Goblin {
         player.health.take_damage(1);
     }
 
-    pub fn update(&mut self, camera: &Camera, frame: &Frame, player: &Player) {
+    pub fn update(&mut self, static_map: &HashMap<Coord, Tile>, player: &Player) {
         if self.move_cooldown > 0 {
             self.move_cooldown -= 1;
 
@@ -40,15 +42,21 @@ impl Goblin {
         }
 
         if self.current_path.is_none() || self.move_cooldown == 0 {
-            let start = Point { x: self.x, y: self.y };
-            let goal = Point { x: player.x, y: player.y };
+            let start = Point {
+                x: self.x,
+                y: self.y,
+            };
+            let goal = Point {
+                x: player.x,
+                y: player.y,
+            };
 
             let is_walkable = |p: Point| {
-                if let Some((scr_x, scr_y)) = camera.world_to_screen(p.x, p.y) {
-                    return frame.is_walkable(scr_x, scr_y);
+                if let Some(tile) = static_map.get(&(p.x, p.y)) {
+                    return tile.is_walkable();
                 }
 
-                return false;
+                return true;
             };
 
             self.current_path = find_path(start, goal, is_walkable);
@@ -56,17 +64,17 @@ impl Goblin {
 
         // Move along the path if we have one
         if let Some(path) = &self.current_path {
-            if path.len() > 1 {  // If we have more than just our current position
-                // let next = path[1];  // Get the next position
-                // self.x = next.x;
-                // self.y = next.y;
-                // self.current_path = Some(path[1..].to_vec());  // Update path
+            if path.len() > 1 { // If we have more than just our current position
+                 // let next = path[1];  // Get the next position
+                 // self.x = next.x;
+                 // self.y = next.y;
+                 // self.current_path = Some(path[1..].to_vec());  // Update path
             } else {
-                self.current_path = None;  // Clear path if we've reached the end
+                self.current_path = None; // Clear path if we've reached the end
             }
         }
 
-        self.move_cooldown = 10;  // Wait 10 frames before next move
+        self.move_cooldown = 10; // Wait 10 frames before next move
     }
 }
 
@@ -74,7 +82,6 @@ impl Drawable for Goblin {
     fn draw(&self, frame: &mut Frame) {
         frame.set_world_char(self.x, self.y, 'G');
 
-        // Draw debug path if debug mode is enabled
         if self.debug_mode {
             if let Some(path) = &self.current_path {
                 for point in path {
@@ -86,18 +93,31 @@ impl Drawable for Goblin {
                             fg: Some(Color::Yellow),
                             bg: None,
                             is_walkable: true,
-                        }
+                        },
                     );
                 }
             }
         }
     }
 
-    fn static_map(&self, _collision_map: &mut std::collections::HashMap<(i32, i32), crate::tile::Tile>) {
+    fn static_map(
+        &self,
+        _collision_map: &mut std::collections::HashMap<(i32, i32), crate::tile::Tile>,
+    ) {
         // Do nothing
     }
 
     fn bound_box(&self) -> BoundingBox {
+        if self.debug_mode {
+            return bounding_box_for_path(
+                &Point {
+                    x: self.x,
+                    y: self.y,
+                },
+                self.current_path.as_ref().map(|v| &v[..]),
+            );
+        }
+
         BoundingBox {
             left: self.x,
             right: self.x + 1,

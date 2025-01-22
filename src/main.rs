@@ -1,21 +1,21 @@
 mod bounding_box;
 mod camera;
 mod drawable;
+mod enemy;
 mod frame;
 mod game;
-mod player;
 mod health;
-mod moveable;
-mod enemy;
 mod pathfinding;
+mod player;
 mod tile;
-mod collideable;
 
 use crate::frame::Frame;
 use crate::game::Game;
 use crossterm::cursor::{Hide, Show};
 use crossterm::style::{ResetColor, SetBackgroundColor, SetForegroundColor};
-use crossterm::terminal::{BeginSynchronizedUpdate, Clear, ClearType, EndSynchronizedUpdate, SetTitle};
+use crossterm::terminal::{
+    BeginSynchronizedUpdate, Clear, ClearType, EndSynchronizedUpdate, SetTitle,
+};
 use crossterm::{
     cursor::MoveTo,
     event::{poll, read, Event, KeyCode},
@@ -31,9 +31,14 @@ use std::time::Duration;
 fn main() -> Result<()> {
     let mut stdout = stdout();
 
-    // Enable raw mode and switch to the alternate screen
     enable_raw_mode()?;
-    execute!(stdout, EnterAlternateScreen, Hide, Clear(ClearType::Purge), SetTitle("Cave Diver Terminal"))?;
+    execute!(
+        stdout,
+        EnterAlternateScreen,
+        Hide,
+        Clear(ClearType::Purge),
+        SetTitle("Cave Diver Terminal")
+    )?;
 
     let (width, height) = size()?;
 
@@ -74,10 +79,8 @@ fn render_frame(stdout: &mut std::io::Stdout, frame: &Frame) -> Result<()> {
         terminal::{Clear, ClearType},
     };
 
-    // Clear the screen so we can draw fresh
     execute!(stdout, Clear(ClearType::Purge))?;
 
-    // Loop through our buffer and print each character
     let mut x = 0;
     let mut y = 0;
 
@@ -87,19 +90,16 @@ fn render_frame(stdout: &mut std::io::Stdout, frame: &Frame) -> Result<()> {
 
         execute!(stdout, MoveTo(x, y))?;
 
-        // If there's a foreground color, set it
         if let Some(fg_color) = cell.fg {
             execute!(stdout, SetForegroundColor(fg_color))?;
         }
-        // If there's a background color, set it
+
         if let Some(bg_color) = cell.bg {
             execute!(stdout, SetBackgroundColor(bg_color))?;
         }
 
         execute!(stdout, Print(cell.ch))?;
 
-        // Reset color for next cell
-        // (if you don't reset, cells below might inherit the color)
         if cell.fg.is_some() || cell.bg.is_some() {
             execute!(stdout, ResetColor)?;
         }

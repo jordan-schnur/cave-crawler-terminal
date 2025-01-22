@@ -6,10 +6,7 @@ pub struct Health {
 
 impl Health {
     pub fn new(max: i32) -> Self {
-        Health {
-            current: max,
-            max,
-        }
+        Health { current: max, max }
     }
 
     pub fn take_damage(&mut self, damage: i32) {

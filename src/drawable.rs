@@ -2,10 +2,10 @@ pub(crate) mod fps;
 pub(crate) mod room;
 pub(crate) mod tree;
 
-use std::collections::HashMap;
 use crate::bounding_box::BoundingBox;
 use crate::frame::Frame;
 use crate::tile::{Coord, Tile};
+use std::collections::HashMap;
 
 pub trait Drawable {
     fn draw(&self, frame: &mut Frame);

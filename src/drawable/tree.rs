@@ -1,9 +1,9 @@
-use std::collections::HashMap;
-use crate::drawable::{Drawable};
-use crate::frame::{Cell, Frame};
-use crossterm::style::Color;
 use crate::bounding_box::BoundingBox;
+use crate::drawable::Drawable;
+use crate::frame::{Cell, Frame};
 use crate::tile::{Coord, Tile};
+use crossterm::style::Color;
+use std::collections::HashMap;
 
 pub struct Tree {
     pub x: i32,
@@ -12,7 +12,6 @@ pub struct Tree {
 
 impl Drawable for Tree {
     fn draw(&self, frame: &mut Frame) {
-        // A single 'T' at (x, y).
         frame.set_world_cell(
             self.x,
             self.y,

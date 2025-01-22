@@ -1,15 +1,15 @@
-use std::collections::HashMap;
 use crate::camera::Camera;
 use crate::drawable::Drawable;
 use crate::frame::Frame;
 use crossterm::event::{poll, read, Event, KeyCode};
+use std::collections::HashMap;
 use std::time::Duration;
 
 use crate::drawable::fps::Fps;
 use crate::drawable::room::Room;
 use crate::drawable::tree::Tree;
-use crate::player::Player;
 use crate::enemy::goblin::Goblin;
+use crate::player::Player;
 use crate::tile::{Coord, Tile};
 
 pub struct Game {
@@ -20,7 +20,6 @@ pub struct Game {
     fps: Fps,
     pub camera: Camera,
     static_map: HashMap<Coord, Tile>,
-    // static_map: HashMap<Coord, Tile>
 }
 
 impl Game {
@@ -29,7 +28,6 @@ impl Game {
 
         let goblin = Goblin::new(20, 10);
 
-        // Create a room and a tree
         let room = Room {
             x: 2,
             y: 2,
@@ -40,6 +38,9 @@ impl Game {
         let tree2 = Tree { x: 16, y: 15 };
         let tree3 = Tree { x: 17, y: 15 };
         let tree4 = Tree { x: 18, y: 15 };
+        let tree5 = Tree { x: 18, y: 16 };
+        let tree6 = Tree { x: 18, y: 17 };
+        let tree7 = Tree { x: 18, y: 18 };
         let fps = Fps {
             last_frame: std::time::Instant::now(),
             frames: 0,
@@ -52,8 +53,10 @@ impl Game {
             Box::new(tree2),
             Box::new(tree3),
             Box::new(tree4),
-            Box::new(goblin)
-            // Add more objects here
+            Box::new(tree5),
+            Box::new(tree6),
+            Box::new(tree7),
+            Box::new(goblin),
         ];
 
         let mut static_map: HashMap<Coord, Tile> = HashMap::new();
@@ -90,7 +93,6 @@ impl Game {
 
     pub fn draw(&mut self, frame: &mut Frame) {
         self.fps.update();
-        // Start by clearing the frame
         frame.clear();
 
         for drawable in &self.drawables {
@@ -99,7 +101,6 @@ impl Game {
             }
         }
 
-        // Draw the Player (directly to frame or as another Drawable)
         if let Some((scr_x, scr_y)) = self.camera.world_to_screen(self.player.x, self.player.y) {
             frame.set_char(scr_x, scr_y, '@');
         }
@@ -115,7 +116,6 @@ impl Game {
                         self.request_exit = true;
                     }
                     KeyCode::Left => {
-                        // Move Player left, if possible
                         player_dx = -1;
                     }
                     KeyCode::Right => {
@@ -131,24 +131,19 @@ impl Game {
                 }
             }
         }
-        let mut temp_frame = Frame::new(self.camera.x, self.camera.y, camera_width, camera_height);
-        temp_frame.clear();
-
-        for drawable in &self.drawables {
-            if self.camera.camera_view.intersects(&drawable.bound_box()) {
-                drawable.draw(&mut temp_frame);
-            }
-        }
 
         if player_dx != 0 || player_dy != 0 {
-            if self.player.attempt_move(player_dx, player_dy, &temp_frame, &self.camera) {
+            if self
+                .player
+                .attempt_move(player_dx, player_dy, &self.static_map)
+            {
                 self.player.health.take_damage(1);
             }
         }
 
         for drawable in &mut self.drawables {
             if let Some(goblin) = drawable.as_any_mut().downcast_mut::<Goblin>() {
-                goblin.update(&self.camera, &temp_frame, &self.player);
+                goblin.update(&self.static_map, &self.player);
             }
         }
 
@@ -156,7 +151,6 @@ impl Game {
     }
 
     pub fn draw_ui(&self, frame: &mut Frame) {
-        // Where the "UI" starts.
         let ui_start = frame.height - (frame.height / 3);
         let middle = frame.width / 2;
 

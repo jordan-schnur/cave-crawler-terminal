@@ -1,7 +1,9 @@
-use crate::drawable::{Drawable};
-use crate::frame::{Cell, Frame};
-use crossterm::style::Color;
 use crate::bounding_box::BoundingBox;
+use crate::drawable::Drawable;
+use crate::frame::{Cell, Frame};
+use crate::tile::{Coord, Tile};
+use crossterm::style::Color;
+use std::collections::HashMap;
 
 pub struct Tree {
     pub x: i32,
@@ -10,7 +12,6 @@ pub struct Tree {
 
 impl Drawable for Tree {
     fn draw(&self, frame: &mut Frame) {
-        // A single 'T' at (x, y).
         frame.set_world_cell(
             self.x,
             self.y,
@@ -23,6 +24,10 @@ impl Drawable for Tree {
         );
     }
 
+    fn static_map(&self, collision_map: &mut HashMap<Coord, Tile>) {
+        collision_map.insert((self.x, self.y), Tile::new(false));
+    }
+
     fn bound_box(&self) -> BoundingBox {
         BoundingBox {
             left: self.x as i32,
@@ -30,5 +35,13 @@ impl Drawable for Tree {
             top: self.y as i32,
             bottom: self.y as i32,
         }
+    }
+
+    fn as_any(&self) -> &dyn std::any::Any {
+        self
+    }
+
+    fn as_any_mut(&mut self) -> &mut dyn std::any::Any {
+        self
     }
 }

@@ -9,7 +9,6 @@ pub struct Fps {
 
 impl Fps {
     pub fn update(&mut self) {
-        // Calculate FPS.
         let now = std::time::Instant::now();
         let elapsed = now - self.last_frame;
         if elapsed.as_secs() > 0 {
@@ -23,7 +22,6 @@ impl Fps {
 
 impl Drawable for Fps {
     fn draw(&self, frame: &mut Frame) {
-        // Draw the FPS counter at (x, y).
         frame.draw_text(
             frame.width - 10,
             0,
@@ -33,6 +31,13 @@ impl Drawable for Fps {
         );
     }
 
+    fn static_map(
+        &self,
+        _collision_map: &mut std::collections::HashMap<(i32, i32), crate::tile::Tile>,
+    ) {
+        // Do nothing
+    }
+
     fn bound_box(&self) -> BoundingBox {
         BoundingBox {
             left: 0,
@@ -40,5 +45,13 @@ impl Drawable for Fps {
             top: 0,
             bottom: 0,
         }
+    }
+
+    fn as_any(&self) -> &dyn std::any::Any {
+        self
+    }
+
+    fn as_any_mut(&mut self) -> &mut dyn std::any::Any {
+        self
     }
 }

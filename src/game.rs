@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use crate::camera::Camera;
 use crate::drawable::Drawable;
 use crate::frame::Frame;
@@ -9,6 +10,7 @@ use crate::drawable::room::Room;
 use crate::drawable::tree::Tree;
 use crate::player::Player;
 use crate::enemy::goblin::Goblin;
+use crate::tile::{Coord, Tile};
 
 pub struct Game {
     drawables: Vec<Box<dyn Drawable>>,
@@ -17,6 +19,8 @@ pub struct Game {
     pub request_exit: bool,
     fps: Fps,
     pub camera: Camera,
+    static_map: HashMap<Coord, Tile>,
+    // static_map: HashMap<Coord, Tile>
 }
 
 impl Game {
@@ -32,20 +36,35 @@ impl Game {
             width: 50,
             height: 55,
         };
-        let tree = Tree { x: 5, y: 5 };
+        let tree = Tree { x: 15, y: 15 };
+        let tree2 = Tree { x: 16, y: 15 };
+        let tree3 = Tree { x: 17, y: 15 };
+        let tree4 = Tree { x: 18, y: 15 };
         let fps = Fps {
             last_frame: std::time::Instant::now(),
             frames: 0,
             fps: 0,
         };
 
+        let drawables: Vec<Box<dyn Drawable>> = vec![
+            Box::new(room),
+            Box::new(tree),
+            Box::new(tree2),
+            Box::new(tree3),
+            Box::new(tree4),
+            Box::new(goblin)
+            // Add more objects here
+        ];
+
+        let mut static_map: HashMap<Coord, Tile> = HashMap::new();
+
+        for drawables in &drawables {
+            drawables.static_map(&mut static_map);
+        }
+
         Self {
-            drawables: vec![
-                Box::new(room),
-                Box::new(tree),
-                Box::new(goblin)
-                // Add more objects here
-            ],
+            drawables,
+            static_map,
             request_exit: false,
             fps,
             camera,
@@ -124,6 +143,12 @@ impl Game {
         if player_dx != 0 || player_dy != 0 {
             if self.player.attempt_move(player_dx, player_dy, &temp_frame, &self.camera) {
                 self.player.health.take_damage(1);
+            }
+        }
+
+        for drawable in &mut self.drawables {
+            if let Some(goblin) = drawable.as_any_mut().downcast_mut::<Goblin>() {
+                goblin.update(&self.camera, &temp_frame, &self.player);
             }
         }
 

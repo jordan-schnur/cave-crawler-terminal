@@ -8,6 +8,8 @@ mod health;
 mod moveable;
 mod enemy;
 mod pathfinding;
+mod tile;
+mod collideable;
 
 use crate::frame::Frame;
 use crate::game::Game;

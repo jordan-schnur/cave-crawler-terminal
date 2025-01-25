@@ -1,7 +1,7 @@
 use crate::bounding_box::BoundingBox;
 use crate::camera::Camera;
 use crate::drawable::Drawable;
-use crate::frame::Frame;
+use crate::frame::{Cell, Frame};
 use crate::health::Health;
 use crate::pathfinding::{bounding_box_for_path, find_path, Point};
 use crate::player::Player;
@@ -75,6 +75,44 @@ impl Goblin {
         }
 
         self.move_cooldown = 10; // Wait 10 frames before next move
+
+
+    }
+
+    pub fn draw_health(&self, frame: &mut Frame) {
+        let max_hearts = self.health.get_max();
+        let filled_hearts = self.health.get_current();
+
+        let hearts = format!("{}{}", "♥".to_string().repeat(filled_hearts as usize),
+                             "♡".repeat((max_hearts - filled_hearts) as usize));
+
+        // Draw health bar, centered on goblin by calculating the middle of the health bar
+        let health_bar_x = self.x - (max_hearts / 2);
+        let health_bar_y = self.y - 1;
+
+        for (i, ch) in hearts.chars().enumerate() {
+            frame.set_world_cell(health_bar_x + i as i32, health_bar_y, Cell {
+                ch,
+                fg: Some(Color::Blue),
+                bg: None,
+                is_walkable: true,
+            });
+        }
+
+        // for i in 0..self.health.get_max() {
+        //     let ch = if i < self.health.get_current() {
+        //         '♥'
+        //     } else {
+        //         '♡'
+        //     };
+        //
+        //     frame.set_world_cell(self.x + i, self.y - 1, Cell {
+        //         ch,
+        //         fg: Some(Color::Red),
+        //         bg: None,
+        //         is_walkable: true,
+        //     });
+        // }
     }
 }
 
@@ -82,9 +120,14 @@ impl Drawable for Goblin {
     fn draw(&self, frame: &mut Frame) {
         frame.set_world_char(self.x, self.y, 'G');
 
+        self.draw_health(frame);
+
         if self.debug_mode {
             if let Some(path) = &self.current_path {
-                for point in path {
+                let skip_first = path.len() > 1;
+
+                // Skip first and last points
+                for point in path.iter().skip(if skip_first { 1 } else { 0 }).take(path.len() - 2) {
                     frame.set_world_cell(
                         point.x,
                         point.y,

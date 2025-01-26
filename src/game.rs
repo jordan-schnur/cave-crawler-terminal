@@ -10,6 +10,7 @@ use crate::drawable::fps::Fps;
 use crate::drawable::room::Room;
 use crate::drawable::tree::Tree;
 use crate::enemy::goblin::Goblin;
+use crate::event::game_event::GameEvent;
 use crate::player::Player;
 use crate::tile::{Coord, Tile};
 
@@ -177,29 +178,38 @@ impl Game {
             }
         }
 
+        let mut events: Vec<GameEvent> = Vec::new();
+
+        let mut move_triggered = false;
         if player_dx != 0 || player_dy != 0 {
             if self
                 .player
                 .attempt_move(player_dx, player_dy, &self.static_map)
             {
-                self.player.health.take_damage(1);
+                move_triggered = true;
             }
         }
 
-        for drawable in &mut self.drawables {
-            if let Some(goblin) = drawable.as_any_mut().downcast_mut::<Goblin>() {
-                goblin.update(&self.static_map, &self.player);
-                if damage_goblin {
-                    goblin.health.take_damage(1);
+        if move_triggered {
+            for drawable in &mut self.drawables {
+                if let Some(goblin) = drawable.as_any_mut().downcast_mut::<Goblin>() {
+                    goblin.update(&self.static_map, &self.player, &mut events);
+                    if damage_goblin {
+                        goblin.health.take_damage(1);
+                    }
                 }
             }
         }
 
-        if write_to_log {
-            // Select a random sentence from the list
-            let sentence = RANDOM_SENTENCES[rand::thread_rng().gen_range(0..RANDOM_SENTENCES.len())];
-
-            self.activity_log.add_entry(sentence);
+        if events.len() > 0 {
+            for event in events {
+                match event {
+                    GameEvent::WriteToLog(message) => {
+                        self.activity_log.add_entry(&message)
+                    },
+                    _ => {}
+                }
+            }
         }
 
         self.update_camera(camera_width, camera_height);

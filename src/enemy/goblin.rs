@@ -8,6 +8,7 @@ use crate::player::Player;
 use crate::tile::{Coord, Tile};
 use crossterm::style::Color;
 use std::collections::HashMap;
+use crate::event::game_event::GameEvent;
 
 pub struct Goblin {
     pub x: i32,
@@ -34,7 +35,7 @@ impl Goblin {
         player.health.take_damage(1);
     }
 
-    pub fn update(&mut self, static_map: &HashMap<Coord, Tile>, player: &Player) {
+    pub fn update(&mut self, static_map: &HashMap<Coord, Tile>, player: &Player,  event_queue: &mut Vec<GameEvent>) {
         if self.move_cooldown > 0 {
             self.move_cooldown -= 1;
 
@@ -65,16 +66,23 @@ impl Goblin {
         // Move along the path if we have one
         if let Some(path) = &self.current_path {
             if path.len() > 1 { // If we have more than just our current position
-                 // let next = path[1];  // Get the next position
-                 // self.x = next.x;
-                 // self.y = next.y;
-                 // self.current_path = Some(path[1..].to_vec());  // Update path
+                event_queue.push(GameEvent::WriteToLog(format!("Goblin moves to {}, {}", path[1].x, path[1].y)));
+                // If player is in the next position, stop moving
+                if path[1].x == player.x && path[1].y == player.y {
+                    // self.attack(player);
+                    self.current_path = None;
+                    return;
+                }
+                // let next = path[1];  // Get the next position
+                //  self.x = next.x;
+                //  self.y = next.y;
+                //  self.current_path = Some(path[1..].to_vec());  // Update path
             } else {
                 self.current_path = None; // Clear path if we've reached the end
             }
         }
 
-        self.move_cooldown = 10; // Wait 10 frames before next move
+        // self.move_cooldown = 10; // Wait 10 frames before next move
 
 
     }
@@ -118,7 +126,26 @@ impl Goblin {
 
 impl Drawable for Goblin {
     fn draw(&self, frame: &mut Frame) {
-        frame.set_world_char(self.x, self.y, 'G');
+        // Unicode characters for the enemy
+        //https://www.unicode.org/charts/PDF/U0300.pdf
+
+        let base_char = 'G'; // Base character for the enemy
+        //
+        // // Combining characters for different actions
+        // let attack_combining_char = '\u{0302}'; // Combining acute accent
+        // let defend_combining_char = '\u{0319}'; // Combining circumflex accent
+        // let heal_combining_char = '\u{0362}'; // Combining tilde
+        //
+        // // Combine base character with different combining characters
+        // let attack_char = format!("{}{}", base_char, attack_combining_char);
+        // let defend_char = format!("{}{}", base_char, defend_combining_char);
+        // let heal_char = format!("{}{}", base_char, heal_combining_char);
+        //
+        // frame.draw_text(self.x as u16, self.y as u16, &attack_char, None, None);
+        // frame.draw_text(self.x as u16, self.y as u16 + 1, &defend_char, None, None);/
+        // frame.draw_text(self.x as u16, self.y as u16 + 2, &heal_char, None, None);
+
+        frame.set_world_char(self.x, self.y, base_char);
 
         self.draw_health(frame);
 
@@ -127,7 +154,7 @@ impl Drawable for Goblin {
                 let skip_first = path.len() > 1;
 
                 // Skip first and last points
-                for point in path.iter().skip(if skip_first { 1 } else { 0 }).take(path.len() - 2) {
+                for point in path.iter().skip(if skip_first { 1 } else { 0 }).take(path.len().saturating_sub(2)) {
                     frame.set_world_cell(
                         point.x,
                         point.y,

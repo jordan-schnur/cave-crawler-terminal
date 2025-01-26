@@ -9,6 +9,7 @@ mod pathfinding;
 mod player;
 mod tile;
 mod activity_log;
+mod event;
 
 use crate::frame::Frame;
 use crate::game::Game;
